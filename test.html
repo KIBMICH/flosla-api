@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Payment Test</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body { max-width: 600px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+    .card { background: white; padding: 24px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h1 { color: #333; margin-top: 0; }
+    h2 { color: #555; margin-top: 0; font-size: 18px; }
+    label { display: block; margin-bottom: 6px; font-weight: 500; color: #444; }
+    input, select { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #0066ff; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #0052cc; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .result { background: #f8f9fa; padding: 12px; border-radius: 4px; margin-top: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; word-break: break-all; }
+    .success { border-left: 4px solid #28a745; }
+    .error { border-left: 4px solid #dc3545; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .steps { display: flex; gap: 8px; margin-bottom: 20px; }
+    .steps span { padding: 8px 16px; background: #e9ecef; border-radius: 20px; font-size: 14px; }
+    .steps span.done { background: #28a745; color: white; }
+    .steps span.current { background: #0066ff; color: white; }
+  </style>
+</head>
+<body>
+  <h1>🎫 Event Payment Test</h1>
+  
+  <div class="steps">
+    <span id="s1" class="current">1. Select Event</span>
+    <span id="s2">2. Register</span>
+    <span id="s3">3. Pay</span>
+    <span id="s4">4. Receipt</span>
+  </div>
+
+  <!-- Step 1: Select Event -->
+  <div id="step1" class="card step active">
+    <h2>Step 1: Select Event</h2>
+    <button onclick="loadEvents()">Load Events</button>
+    <div id="eventsList"></div>
+    <div id="eventsResult" class="result" style="display:none"></div>
+  </div>
+
+  <!-- Step 2: Register -->
+  <div id="step2" class="card step">
+    <h2>Step 2: Register for Event</h2>
+    <p id="selectedEvent" style="color:#0066ff; font-weight:500;"></p>
+    <label>Full Name</label>
+    <input type="text" id="fullName" value="John Doe">
+    <label>Email</label>
+    <input type="email" id="email" value="john@example.com">
+    <label>Phone (optional)</label>
+    <input type="tel" id="phone" value="08012345678">
+    <button onclick="register()">Register</button>
+    <div id="registerResult" class="result" style="display:none"></div>
+  </div>
+
+  <!-- Step 3: Pay -->
+  <div id="step3" class="card step">
+    <h2>Step 3: Make Payment</h2>
+    <p>Reference: <strong id="refDisplay"></strong></p>
+    <button onclick="initPayment()">Pay with Paystack</button>
+    <div id="payResult" class="result" style="display:none"></div>
+  </div>
+
+  <!-- Step 4: Receipt -->
+  <div id="step4" class="card step">
+    <h2>Step 4: View Receipt</h2>
+    <button onclick="getReceipt()">Get Receipt</button>
+    <button onclick="verifyReceipt()">Verify Receipt</button>
+    <div id="receiptResult" class="result" style="display:none"></div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000/api';
+    let selectedEventId = '';
+    let registrationId = '';
+    let reference = '';
+
+    function showStep(n) {
+      document.querySelectorAll('.step').forEach((el, i) => {
+        el.classList.toggle('active', i === n - 1);
+      });
+      for (let i = 1; i <= 4; i++) {
+        const s = document.getElementById('s' + i);
+        s.classList.remove('done', 'current');
+        if (i < n) s.classList.add('done');
+        if (i === n) s.classList.add('current');
+      }
+    }
+
+    function showResult(id, data, isError = false) {
+      const el = document.getElementById(id);
+      el.style.display = 'block';
+      el.className = 'result ' + (isError ? 'error' : 'success');
+      el.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function loadEvents() {
+      try {
+        const res = await fetch(`${API}/events`);
+        const data = await res.json();
+        showResult('eventsResult', data);
+        
+        if (data.success && data.data.length > 0) {
+          let html = '<div style="margin-top:16px">';
+          data.data.forEach(e => {
+            html += `<div style="padding:12px; border:1px solid #ddd; border-radius:4px; margin-bottom:8px; cursor:pointer" onclick="selectEvent('${e._id}', '${e.name}', ${e.amount})">
+              <strong>${e.name}</strong><br>
+              <small>₦${(e.amount/100).toLocaleString()} - ${e.description}</small>
+            </div>`;
+          });
+          html += '</div>';
+          document.getElementById('eventsList').innerHTML = html;
+        } else if (data.data.length === 0) {
+          document.getElementById('eventsList').innerHTML = '<p style="color:#dc3545; margin-top:16px">No events found. Create one via Admin API first.</p>';
+        }
+      } catch (err) {
+        showResult('eventsResult', { error: err.message }, true);
+      }
+    }
+
+    function selectEvent(id, name, amount) {
+      selectedEventId = id;
+      document.getElementById('selectedEvent').textContent = `Event: ${name} (₦${(amount/100).toLocaleString()})`;
+      showStep(2);
+    }
+
+    async function register() {
+      try {
+        const res = await fetch(`${API}/events/${selectedEventId}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value
+          })
+        });
+        const data = await res.json();
+        showResult('registerResult', data, !data.success);
+        
+        if (data.success) {
+          registrationId = data.data.registrationId;
+          reference = data.data.reference;
+          document.getElementById('refDisplay').textContent = reference;
+          setTimeout(() => showStep(3), 1000);
+        }
+      } catch (err) {
+        showResult('registerResult', { error: err.message }, true);
+      }
+    }
+
+    async function initPayment() {
+      try {
+        const res = await fetch(`${API}/payments/initialize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ registrationId, reference })
+        });
+        const data = await res.json();
+        showResult('payResult', data, !data.success);
+        
+        if (data.success) {
+          window.open(data.data.authorizationUrl, '_blank');
+          setTimeout(() => showStep(4), 2000);
+        }
+      } catch (err) {
+        showResult('payResult', { error: err.message }, true);
+      }
+    }
+
+    async function getReceipt() {
+      try {
+        const res = await fetch(`${API}/receipts/${reference}`);
+        const data = await res.json();
+        showResult('receiptResult', data, !data.success);
+      } catch (err) {
+        showResult('receiptResult', { error: err.message }, true);
+      }
+    }
+
+    async function verifyReceipt() {
+      try {
+        const res = await fetch(`${API}/receipts/verify/${reference}`);
+        const data = await res.json();
+        showResult('receiptResult', data, !data.success);
+      } catch (err) {
+        showResult('receiptResult', { error: err.message }, true);
+      }
+    }
+  </script>
+</body>
+</html>
