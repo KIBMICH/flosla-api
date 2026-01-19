@@ -38,17 +38,23 @@
           }
         },
         {
-          "name": "Get Active Events",
+          "name": "Get Event Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('eventId', jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/events"
-          }
-        },
-        {
-          "name": "Get Event by ID",
-          "request": {
-            "method": "GET",
-            "url": "{{baseUrl}}/events/{{eventId}}"
           }
         },
         {
@@ -69,7 +75,7 @@
           ],
           "request": {
             "method": "POST",
-            "url": "{{baseUrl}}/events/{{eventId}}/register",
+            "url": "{{baseUrl}}/events/register",
             "header": [
               {
                 "key": "Content-Type",
@@ -78,7 +84,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"08012345678\"\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"surname\": \"Doe\",\n  \"sex\": \"male\",\n  \"dateOfBirth\": \"01/15/2010\",\n  \"age\": 16,\n  \"stateOfResidence\": \"Lagos\",\n  \"stateOfOrigin\": \"Ogun\",\n  \"positionOfPlay\": \"Forward\",\n  \"guardianFullName\": \"Jane Doe\",\n  \"guardianPhoneNumber\": \"08012345678\",\n  \"email\": \"john@example.com\"\n}"
             }
           }
         },
@@ -208,7 +214,49 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Tech Conference 2026\",\n  \"description\": \"Annual technology conference\",\n  \"amount\": 500000\n}"
+              "raw": "{\n  \"amount\": 500000\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Event Amount",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/admin/events/amount",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 600000\n}"
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/change-password",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"admin123\",\n  \"newPassword\": \"newpassword123\"\n}"
             }
           }
         },

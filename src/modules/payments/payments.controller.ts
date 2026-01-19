@@ -33,18 +33,29 @@ export const initializePayment = async (req: Request, res: Response, next: NextF
       return next(new AppError('Event not found', 404));
     }
 
+    // Use guardian phone if no email provided
+    const contactEmail = registration.email || `${registration.guardianPhoneNumber}@temp.flosla.com`;
+
+    const paymentData = {
+      email: contactEmail,
+      amount: event.amount, // Amount should already be in kobo
+      reference: registration.paystackReference,
+      currency: event.currency,
+      callback_url: `${config.frontendUrl}/payment/verify`,
+      metadata: {
+        registrationId: registration._id.toString(),
+        eventId: event._id.toString(),
+        playerName: `${registration.firstName} ${registration.surname}`,
+        guardianName: registration.guardianFullName,
+        guardianPhone: registration.guardianPhoneNumber,
+      },
+    };
+
+    console.log('Sending to Paystack:', JSON.stringify(paymentData, null, 2));
+
     const response = await axios.post(
       `${config.paystack.baseUrl}/transaction/initialize`,
-      {
-        email: registration.email,
-        amount: event.amount,
-        reference: registration.paystackReference,
-        callback_url: `${config.frontendUrl}/payment/verify`,
-        metadata: {
-          registrationId: registration._id.toString(),
-          eventId: event._id.toString(),
-        },
-      },
+      paymentData,
       {
         headers: {
           Authorization: `Bearer ${config.paystack.secretKey}`,
@@ -60,6 +71,11 @@ export const initializePayment = async (req: Request, res: Response, next: NextF
       },
     });
   } catch (error) {
+    console.error('Payment initialization error:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Paystack API error:', error.response?.data);
+      return next(new AppError(error.response?.data?.message || 'Payment initialization failed', error.response?.status || 500));
+    }
     next(error);
   }
 };
