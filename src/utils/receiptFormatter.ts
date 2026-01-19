@@ -4,8 +4,18 @@ import { IEvent } from '../models/Event';
 
 interface ReceiptData {
   receiptNumber: string;
-  name: string;
-  email: string;
+  playerName: string;
+  firstName: string;
+  surname: string;
+  sex: string;
+  dateOfBirth: string;
+  age: number;
+  stateOfResidence: string;
+  stateOfOrigin: string;
+  positionOfPlay: string;
+  guardianFullName: string;
+  guardianPhoneNumber: string;
+  email?: string;
   event: string;
   amount: number;
   currency: string;
@@ -20,7 +30,17 @@ export const formatReceipt = (
 ): ReceiptData => {
   return {
     receiptNumber: payment.receiptNumber,
-    name: registration.fullName,
+    playerName: `${registration.firstName} ${registration.surname}`,
+    firstName: registration.firstName,
+    surname: registration.surname,
+    sex: registration.sex,
+    dateOfBirth: registration.dateOfBirth,
+    age: registration.age,
+    stateOfResidence: registration.stateOfResidence,
+    stateOfOrigin: registration.stateOfOrigin,
+    positionOfPlay: registration.positionOfPlay,
+    guardianFullName: registration.guardianFullName,
+    guardianPhoneNumber: registration.guardianPhoneNumber,
     email: registration.email,
     event: event.name,
     amount: payment.amount / 100,

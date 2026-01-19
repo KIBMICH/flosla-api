@@ -8,6 +8,7 @@ import { Registration } from '../../models/Registration';
 import { Payment } from '../../models/Payment';
 import { Event } from '../../models/Event';
 import { AppError } from '../../middlewares/error.middleware';
+import { logger } from '../../utils/logger';
 
 const MAX_LIMIT = 100;
 
@@ -17,6 +18,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
     if (existingAdmin) {
+      logger.security('Admin registration attempt with existing email', { email });
       return next(new AppError('Admin already exists', 400));
     }
 
@@ -29,6 +31,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     });
 
     const token = jwt.sign({ adminId: admin._id }, config.jwtSecret, { expiresIn: '24h' });
+
+    logger.security('New admin registered', { email: admin.email, id: admin._id });
 
     res.status(201).json({
       success: true,
@@ -53,15 +57,19 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     const admin = await Admin.findOne({ email: email.toLowerCase() });
     if (!admin) {
+      logger.security('Failed login attempt - admin not found', { email });
       return next(new AppError('Invalid credentials', 401));
     }
 
     const isMatch = await bcrypt.compare(password, admin.passwordHash);
     if (!isMatch) {
+      logger.security('Failed login attempt - wrong password', { email });
       return next(new AppError('Invalid credentials', 401));
     }
 
     const token = jwt.sign({ adminId: admin._id }, config.jwtSecret, { expiresIn: '24h' });
+
+    logger.security('Admin logged in', { email: admin.email, id: admin._id });
 
     res.json({
       success: true,
@@ -201,10 +209,10 @@ export const exportRecords = async (req: Request, res: Response, next: NextFunct
     const registrations = await Registration.find(filter).populate('eventId', 'name');
 
     const csv = [
-      'Name,Email,Phone,Event,Reference,Paid At',
+      'First Name,Surname,Sex,Date of Birth,Age,State of Residence,State of Origin,Position,Guardian Name,Guardian Phone,Email,Event,Reference,Registered Date',
       ...registrations.map((r) => {
         const event = r.eventId as unknown as { name: string };
-        return `"${r.fullName}","${r.email}","${r.phone || ''}","${event?.name || ''}","${r.paystackReference}","${r.createdAt.toISOString()}"`;
+        return `"${r.firstName}","${r.surname}","${r.sex}","${r.dateOfBirth}",${r.age},"${r.stateOfResidence}","${r.stateOfOrigin}","${r.positionOfPlay}","${r.guardianFullName}","${r.guardianPhoneNumber}","${r.email || ''}","${event?.name || ''}","${r.paystackReference}","${r.registeredDate.toISOString()}"`;
       }),
     ].join('\n');
 
@@ -218,15 +226,39 @@ export const exportRecords = async (req: Request, res: Response, next: NextFunct
 
 export const createEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, description, amount } = req.body;
+    const { amount } = req.body;
+
+    // Check if event already exists
+    const existingEvent = await Event.findOne();
+    if (existingEvent) {
+      return next(new AppError('Event already exists. Use update endpoint to change amount.', 400));
+    }
 
     const event = await Event.create({
-      name,
-      description,
+      name: 'U-13 Football Registration',
+      description: 'Under 13 Football Registration',
       amount,
     });
 
     res.status(201).json({ success: true, data: event });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateEventAmount = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { amount } = req.body;
+
+    const event = await Event.findOne();
+    if (!event) {
+      return next(new AppError('Event not found. Create event first.', 404));
+    }
+
+    event.amount = amount;
+    await event.save();
+
+    res.json({ success: true, data: event });
   } catch (error) {
     next(error);
   }
@@ -251,6 +283,33 @@ export const getAllAdmins = async (_req: Request, res: Response, next: NextFunct
   try {
     const admins = await Admin.find().select('-passwordHash');
     res.json({ success: true, data: admins });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const adminId = (req as any).adminId;
+    const { currentPassword, newPassword } = req.body;
+
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return next(new AppError('Admin not found', 404));
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, admin.passwordHash);
+    if (!isMatch) {
+      logger.security('Failed password change - wrong current password', { adminId });
+      return next(new AppError('Current password is incorrect', 401));
+    }
+
+    admin.passwordHash = await bcrypt.hash(newPassword, 12);
+    await admin.save();
+
+    logger.security('Admin password changed', { adminId, email: admin.email });
+
+    res.json({ success: true, message: 'Password changed successfully' });
   } catch (error) {
     next(error);
   }
