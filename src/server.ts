@@ -4,14 +4,8 @@ import { config } from './config';
 
 const start = async () => {
   try {
-    // MongoDB connection with security options
-    await mongoose.connect(config.mongoUri, {
-      family: 4, // forces IPv4 instead of IPv6
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 30000, // Increased to 30 seconds
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 30000,
-    });
+    // MongoDB connection - modern Mongoose auto-handles pooling & timeouts
+    await mongoose.connect(config.mongoUri);
     console.log('Connected to MongoDB');
 
     const server = app.listen(config.port, () => {

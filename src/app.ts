@@ -61,7 +61,7 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/receipts', receiptsRoutes);
 app.use('/api/admin', adminRoutes);
 
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: express.Request, res: express.Response) => {
   res.json({ status: 'ok' });
 });
 
