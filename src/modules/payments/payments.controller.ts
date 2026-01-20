@@ -80,6 +80,115 @@ export const initializePayment = async (req: Request, res: Response, next: NextF
   }
 };
 
+export const verifyPayment = async (req: Request, res: Response, next: NextFunction) => {
+  const session = await mongoose.startSession();
+  
+  try {
+    const { reference } = req.query;
+
+    if (!reference || typeof reference !== 'string') {
+      return next(new AppError('Payment reference is required', 400));
+    }
+
+    // Verify with Paystack
+    const response = await axios.get(
+      `${config.paystack.baseUrl}/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${config.paystack.secretKey}`,
+        },
+      }
+    );
+
+    const { data } = response.data;
+
+    if (data.status !== 'success') {
+      return res.json({
+        success: false,
+        message: 'Payment verification failed',
+        status: data.status,
+      });
+    }
+
+    const registration = await Registration.findOne({ paystackReference: reference });
+    if (!registration) {
+      return next(new AppError('Registration not found', 404));
+    }
+
+    // If already paid, return success
+    if (registration.paymentStatus === 'PAID') {
+      return res.json({
+        success: true,
+        message: 'Payment already verified',
+        data: {
+          registrationId: registration._id,
+          reference,
+          amount: data.amount / 100, // Convert from kobo to naira
+          status: 'success',
+        },
+      });
+    }
+
+    const eventDoc = await Event.findById(registration.eventId);
+    if (!eventDoc) {
+      return next(new AppError('Event not found', 404));
+    }
+
+    // Verify amount matches
+    if (data.amount !== eventDoc.amount) {
+      return next(new AppError('Payment amount mismatch', 400));
+    }
+
+    // Use transaction for atomic updates
+    session.startTransaction();
+
+    registration.paymentStatus = 'PAID';
+    registration.receiptGenerated = true;
+    await registration.save({ session });
+
+    // Check if payment record already exists
+    const existingPayment = await Payment.findOne({ receiptNumber: reference });
+    if (!existingPayment) {
+      await Payment.create(
+        [{
+          registrationId: registration._id,
+          receiptNumber: reference,
+          amount: data.amount,
+          currency: data.currency,
+          channel: data.channel,
+          status: 'success',
+          paystackResponse: data,
+          paidAt: new Date(data.paid_at),
+        }],
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+
+    res.json({
+      success: true,
+      message: 'Payment verified successfully',
+      data: {
+        registrationId: registration._id,
+        reference,
+        amount: data.amount / 100, // Convert from kobo to naira
+        status: 'success',
+      },
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('Payment verification error:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Paystack API error:', error.response?.data);
+      return next(new AppError(error.response?.data?.message || 'Payment verification failed', error.response?.status || 500));
+    }
+    next(error);
+  } finally {
+    session.endSession();
+  }
+};
+
 export const handleWebhook = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
   
