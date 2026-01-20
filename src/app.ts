@@ -44,12 +44,18 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps, Postman, or webhooks)
     if (!origin) return callback(null, true);
     
+    // Check exact match
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    
+    // Allow all Vercel preview deployments
+    if (origin.includes('fosla-registration-portal') && origin.includes('.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    console.warn(`CORS blocked origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   optionsSuccessStatus: 200,
