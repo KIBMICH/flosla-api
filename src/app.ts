@@ -28,20 +28,23 @@ app.use(helmet({
   },
 }));
 
-// CORS
+// CORS - Allow frontend and localhost
 const allowedOrigins = [
+  'http://localhost:3000',
   'http://localhost:3001',
+  config.frontendUrl,
   'https://fosla-registration-portal.vercel.app'
-];
+].filter(Boolean);
 
 app.use(cors({ 
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or Postman)
+    // Allow requests with no origin (like mobile apps, Postman, or webhooks)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn(`CORS blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
