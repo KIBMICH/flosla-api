@@ -13,6 +13,9 @@ import adminRoutes from './modules/admin/admin.routes';
 
 const app = express();
 
+// Trust proxy - required when behind Render/Heroku/etc
+app.set('trust proxy', 1);
+
 // Security headers
 app.use(helmet({
   contentSecurityPolicy: {
