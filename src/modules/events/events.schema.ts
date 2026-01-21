@@ -11,7 +11,7 @@ export const registerEventSchema = z.object({
   surname: z.string().min(1, 'Surname is required'),
   sex: z.enum(['male', 'female'], { errorMap: () => ({ message: 'Sex must be male or female' }) }),
   dateOfBirth: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Date of birth must be in MM/DD/YYYY format'),
-  age: z.number().int().min(0).max(150, 'Age must be between 0 and 150'),
+  age: z.number().int().min(1, 'Age must be at least 1').max(12, 'This event is for children under 13 years old only'),
   stateOfResidence: z.string().min(1, 'State of residence is required'),
   stateOfOrigin: z.string().min(1, 'State of origin is required'),
   positionOfPlay: z.string().min(1, 'Position of play is required'),

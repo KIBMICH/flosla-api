@@ -56,6 +56,24 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
       email,
     } = req.body;
 
+    // Validate age from date of birth
+    const [month, day, year] = dateOfBirth.split('/').map(Number);
+    const dob = new Date(year, month - 1, day);
+    const today = new Date();
+    const calculatedAge = today.getFullYear() - dob.getFullYear() - 
+      (today.getMonth() < dob.getMonth() || 
+       (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate()) ? 1 : 0);
+
+    // Verify age matches calculated age
+    if (Math.abs(calculatedAge - age) > 1) {
+      return next(new AppError('Age does not match date of birth', 400));
+    }
+
+    // Ensure child is under 13
+    if (calculatedAge >= 13) {
+      return next(new AppError('This event is for children under 13 years old only', 400));
+    }
+
     // Check for duplicate registration (same guardian phone + child name)
     const existingRegistration = await Registration.findOne({
       eventId: event._id,
@@ -76,7 +94,7 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
       surname,
       sex,
       dateOfBirth,
-      age,
+      age: calculatedAge, // Use calculated age
       stateOfResidence,
       stateOfOrigin,
       positionOfPlay,
