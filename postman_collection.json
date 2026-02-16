@@ -24,6 +24,10 @@
     {
       "key": "reference",
       "value": ""
+    },
+    {
+      "key": "hfToken",
+      "value": "YOUR_HUGGINGFACE_TOKEN_HERE"
     }
   ],
   "item": [
@@ -335,6 +339,83 @@
                 "value": "Bearer {{token}}"
               }
             ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Chat",
+      "item": [
+        {
+          "name": "Test HF Direct (Router)",
+          "request": {
+            "method": "POST",
+            "url": "https://router.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inputs\": \"Hello, how are you?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Chat with AI",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/ai/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What is menstrual hygiene and why is it important?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Chat - Mental Health Question",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/ai/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"How can I manage stress during exams?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Chat - Youth Empowerment",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/ai/chat",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What are some ways to build confidence as a young person?\"\n}"
+            }
           }
         }
       ]

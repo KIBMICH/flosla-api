@@ -33,8 +33,8 @@ export const initializePayment = async (req: Request, res: Response, next: NextF
       return next(new AppError('Event not found', 404));
     }
 
-    // Use guardian phone if no email provided
-    const contactEmail = registration.email || `${registration.guardianPhoneNumber}@temp.flosla.com`;
+    // Use guardian WhatsApp number as email for Paystack
+    const contactEmail = `${registration.guardianWhatsappNumber}@temp.flosla.com`;
 
     const paymentData = {
       email: contactEmail,
@@ -47,7 +47,7 @@ export const initializePayment = async (req: Request, res: Response, next: NextF
         eventId: event._id.toString(),
         playerName: `${registration.firstName} ${registration.surname}`,
         guardianName: registration.guardianFullName,
-        guardianPhone: registration.guardianPhoneNumber,
+        guardianPhone: registration.guardianWhatsappNumber,
       },
     };
 
