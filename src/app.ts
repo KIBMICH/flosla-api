@@ -10,6 +10,7 @@ import eventsRoutes from './modules/events/events.routes';
 import paymentsRoutes from './modules/payments/payments.routes';
 import receiptsRoutes from './modules/receipts/receipts.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import aiChatRoutes from './modules/ai-chat/ai-chat.routes';
 
 const app = express();
 
@@ -86,6 +87,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/receipts', receiptsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ai', aiChatRoutes);
 
 app.get('/health', (_req: express.Request, res: express.Response) => {
   res.json({ status: 'ok' });
