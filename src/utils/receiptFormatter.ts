@@ -12,10 +12,13 @@ interface ReceiptData {
   age: number;
   stateOfResidence: string;
   stateOfOrigin: string;
+  religion: string;
   positionOfPlay: string;
+  firstAlternatePosition: string;
+  secondAlternatePosition: string;
   guardianFullName: string;
-  guardianPhoneNumber: string;
-  email?: string;
+  guardianWhatsappNumber: string;
+  guardianOccupation: string;
   event: string;
   amount: number;
   currency: string;
