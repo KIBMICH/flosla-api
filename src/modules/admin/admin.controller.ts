@@ -209,10 +209,10 @@ export const exportRecords = async (req: Request, res: Response, next: NextFunct
     const registrations = await Registration.find(filter).populate('eventId', 'name');
 
     const csv = [
-      'First Name,Surname,Sex,Date of Birth,Age,State of Residence,State of Origin,Position,Guardian Name,Guardian Phone,Email,Event,Reference,Registered Date',
+      'First Name,Surname,Sex,Date of Birth,Age,State of Residence,State of Origin,Religion,Position,First Alternate Position,Second Alternate Position,Guardian Name,Guardian WhatsApp,Guardian Occupation,Event,Reference,Registered Date',
       ...registrations.map((r) => {
         const event = r.eventId as unknown as { name: string };
-        return `"${r.firstName}","${r.surname}","${r.sex}","${r.dateOfBirth}",${r.age},"${r.stateOfResidence}","${r.stateOfOrigin}","${r.positionOfPlay}","${r.guardianFullName}","${r.guardianPhoneNumber}","${r.email || ''}","${event?.name || ''}","${r.paystackReference}","${r.registeredDate.toISOString()}"`;
+        return `"${r.firstName}","${r.surname}","${r.sex}","${r.dateOfBirth}",${r.age},"${r.stateOfResidence}","${r.stateOfOrigin}","${r.religion}","${r.positionOfPlay}","${r.firstAlternatePosition}","${r.secondAlternatePosition}","${r.guardianFullName}","${r.guardianWhatsappNumber}","${r.guardianOccupation}","${event?.name || ''}","${r.paystackReference}","${r.registeredDate.toISOString()}"`;
       }),
     ].join('\n');
 

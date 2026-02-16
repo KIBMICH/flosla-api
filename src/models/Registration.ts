@@ -9,10 +9,13 @@ export interface IRegistration extends Document {
   age: number;
   stateOfResidence: string;
   stateOfOrigin: string;
+  religion: string;
   positionOfPlay: string;
+  firstAlternatePosition: string;
+  secondAlternatePosition: string;
   guardianFullName: string;
-  guardianPhoneNumber: string;
-  email?: string;
+  guardianWhatsappNumber: string;
+  guardianOccupation: string;
   paymentStatus: 'PENDING' | 'PAID';
   paystackReference: string;
   receiptGenerated: boolean;
@@ -28,10 +31,13 @@ const RegistrationSchema = new Schema<IRegistration>({
   age: { type: Number, required: true, min: 0, max: 150 },
   stateOfResidence: { type: String, required: true },
   stateOfOrigin: { type: String, required: true },
+  religion: { type: String, required: true },
   positionOfPlay: { type: String, required: true },
+  firstAlternatePosition: { type: String, required: true },
+  secondAlternatePosition: { type: String, required: true },
   guardianFullName: { type: String, required: true },
-  guardianPhoneNumber: { type: String, required: true },
-  email: { type: String, index: true },
+  guardianWhatsappNumber: { type: String, required: true },
+  guardianOccupation: { type: String, required: true },
   paymentStatus: { type: String, enum: ['PENDING', 'PAID'], default: 'PENDING' },
   paystackReference: { type: String, required: true, unique: true },
   receiptGenerated: { type: Boolean, default: false },
