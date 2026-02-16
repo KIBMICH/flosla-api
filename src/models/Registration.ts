@@ -28,7 +28,7 @@ const RegistrationSchema = new Schema<IRegistration>({
   surname: { type: String, required: true },
   sex: { type: String, enum: ['male', 'female'], required: true },
   dateOfBirth: { type: String, required: true },
-  age: { type: Number, required: true, min: 0, max: 150 },
+  age: { type: Number, required: true, min: 1, max: 12 },
   stateOfResidence: { type: String, required: true },
   stateOfOrigin: { type: String, required: true },
   religion: { type: String, required: true },

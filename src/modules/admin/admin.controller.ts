@@ -110,7 +110,7 @@ export const getRegistrations = async (req: Request, res: Response, next: NextFu
         .populate('eventId', 'name amount')
         .skip(skip)
         .limit(limitNum)
-        .sort({ createdAt: -1 }),
+        .sort({ registeredDate: -1 }),
       Registration.countDocuments(filter),
     ]);
 
