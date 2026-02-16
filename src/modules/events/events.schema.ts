@@ -14,8 +14,11 @@ export const registerEventSchema = z.object({
   age: z.number().int().min(1, 'Age must be at least 1').max(12, 'This event is for children under 13 years old only'),
   stateOfResidence: z.string().min(1, 'State of residence is required'),
   stateOfOrigin: z.string().min(1, 'State of origin is required'),
+  religion: z.string().min(1, 'Religion is required'),
   positionOfPlay: z.string().min(1, 'Position of play is required'),
+  firstAlternatePosition: z.string().min(1, 'First alternate position is required'),
+  secondAlternatePosition: z.string().min(1, 'Second alternate position is required'),
   guardianFullName: z.string().min(1, 'Guardian full name is required'),
-  guardianPhoneNumber: z.string().min(10, 'Valid guardian phone number is required'),
-  email: z.string().email('Valid email is required').optional(),
+  guardianWhatsappNumber: z.string().min(10, 'Valid guardian WhatsApp number is required'),
+  guardianOccupation: z.string().min(1, 'Guardian occupation is required'),
 });

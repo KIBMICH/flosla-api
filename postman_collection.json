@@ -88,7 +88,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"surname\": \"Doe\",\n  \"sex\": \"male\",\n  \"dateOfBirth\": \"01/15/2010\",\n  \"age\": 16,\n  \"stateOfResidence\": \"Lagos\",\n  \"stateOfOrigin\": \"Ogun\",\n  \"positionOfPlay\": \"Forward\",\n  \"guardianFullName\": \"Jane Doe\",\n  \"guardianPhoneNumber\": \"08012345678\",\n  \"email\": \"john@example.com\"\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"surname\": \"Doe\",\n  \"sex\": \"male\",\n  \"dateOfBirth\": \"01/15/2010\",\n  \"age\": 16,\n  \"stateOfResidence\": \"Lagos\",\n  \"stateOfOrigin\": \"Ogun\",\n  \"religion\": \"Christianity\",\n  \"positionOfPlay\": \"Forward\",\n  \"firstAlternatePosition\": \"Midfielder\",\n  \"secondAlternatePosition\": \"Winger\",\n  \"guardianFullName\": \"Jane Doe\",\n  \"guardianWhatsappNumber\": \"08012345678\",\n  \"guardianOccupation\": \"Teacher\"\n}"
             }
           }
         },

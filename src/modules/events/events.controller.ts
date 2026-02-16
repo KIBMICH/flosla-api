@@ -50,10 +50,13 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
       age,
       stateOfResidence,
       stateOfOrigin,
+      religion,
       positionOfPlay,
+      firstAlternatePosition,
+      secondAlternatePosition,
       guardianFullName,
-      guardianPhoneNumber,
-      email,
+      guardianWhatsappNumber,
+      guardianOccupation,
     } = req.body;
 
     // Validate age from date of birth
@@ -77,7 +80,7 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
     // Check for duplicate registration (same guardian phone + child name)
     const existingRegistration = await Registration.findOne({
       eventId: event._id,
-      guardianPhoneNumber,
+      guardianWhatsappNumber,
       firstName: { $regex: new RegExp(`^${firstName}$`, 'i') },
       surname: { $regex: new RegExp(`^${surname}$`, 'i') },
     });
@@ -97,10 +100,13 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
       age: calculatedAge, // Use calculated age
       stateOfResidence,
       stateOfOrigin,
+      religion,
       positionOfPlay,
+      firstAlternatePosition,
+      secondAlternatePosition,
       guardianFullName,
-      guardianPhoneNumber,
-      email: email?.toLowerCase(),
+      guardianWhatsappNumber,
+      guardianOccupation,
       paystackReference: reference,
     });
 
