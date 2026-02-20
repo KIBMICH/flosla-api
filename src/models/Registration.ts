@@ -15,6 +15,7 @@ export interface IRegistration extends Document {
   secondAlternatePosition: string;
   guardianFullName: string;
   guardianWhatsappNumber: string;
+  guardianEmail?: string;
   guardianOccupation: string;
   paymentStatus: 'PENDING' | 'PAID';
   paystackReference: string;
@@ -37,6 +38,7 @@ const RegistrationSchema = new Schema<IRegistration>({
   secondAlternatePosition: { type: String, required: true },
   guardianFullName: { type: String, required: true },
   guardianWhatsappNumber: { type: String, required: true },
+  guardianEmail: { type: String, required: false },
   guardianOccupation: { type: String, required: true },
   paymentStatus: { type: String, enum: ['PENDING', 'PAID'], default: 'PENDING' },
   paystackReference: { type: String, required: true, unique: true },

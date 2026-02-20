@@ -33,8 +33,8 @@ export const initializePayment = async (req: Request, res: Response, next: NextF
       return next(new AppError('Event not found', 404));
     }
 
-    // Use guardian WhatsApp number as email for Paystack
-    const contactEmail = `${registration.guardianWhatsappNumber}@temp.flosla.com`;
+    // Use guardian email if provided, otherwise use WhatsApp number as fallback
+    const contactEmail = registration.guardianEmail || `${registration.guardianWhatsappNumber}@temp.flosla.com`;
 
     const paymentData = {
       email: contactEmail,
