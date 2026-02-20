@@ -77,12 +77,13 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
       return next(new AppError('This event is for children under 13 years old only', 400));
     }
 
-    // Check for duplicate registration (same guardian phone + child name)
+    // Check for duplicate registration (same guardian phone + child name) with successful payment
     const existingRegistration = await Registration.findOne({
       eventId: event._id,
       guardianWhatsappNumber,
       firstName: { $regex: new RegExp(`^${firstName}$`, 'i') },
       surname: { $regex: new RegExp(`^${surname}$`, 'i') },
+      paymentStatus: 'PAID', // Only check for paid registrations
     });
 
     if (existingRegistration) {
