@@ -33,8 +33,11 @@ export const initializePayment = async (req: Request, res: Response, next: NextF
       return next(new AppError('Event not found', 404));
     }
 
-    // Use guardian email if provided, otherwise use WhatsApp number as fallback
-    const contactEmail = registration.guardianEmail || `${registration.guardianWhatsappNumber}@temp.flosla.com`;
+    if (!registration.guardianEmail) {
+      return next(new AppError('Guardian email is required for payment', 400));
+    }
+
+    const contactEmail = registration.guardianEmail;
 
     const paymentData = {
       email: contactEmail,
