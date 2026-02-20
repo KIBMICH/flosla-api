@@ -20,5 +20,6 @@ export const registerEventSchema = z.object({
   secondAlternatePosition: z.string().min(1, 'Second alternate position is required'),
   guardianFullName: z.string().min(1, 'Guardian full name is required'),
   guardianWhatsappNumber: z.string().min(10, 'Valid guardian WhatsApp number is required'),
+  guardianEmail: z.string().email('Valid guardian email is required'),
   guardianOccupation: z.string().min(1, 'Guardian occupation is required'),
 });

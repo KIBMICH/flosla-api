@@ -56,6 +56,7 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
       secondAlternatePosition,
       guardianFullName,
       guardianWhatsappNumber,
+      guardianEmail,
       guardianOccupation,
     } = req.body;
 
@@ -107,6 +108,7 @@ export const registerForEvent = async (req: Request, res: Response, next: NextFu
       secondAlternatePosition,
       guardianFullName,
       guardianWhatsappNumber,
+      guardianEmail,
       guardianOccupation,
       paystackReference: reference,
     });
